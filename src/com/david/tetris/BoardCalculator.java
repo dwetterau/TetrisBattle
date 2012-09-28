@@ -155,7 +155,8 @@ public class BoardCalculator {
 			   75 * average +
 			  442 * holes +
 		 	   56 * bumpiness +
-			  352 * valleys;
+			  352 * valleys -
+              ((linesCleared > 0) ? 10000 * (linesCleared) : 0);
 	}
 	
 	public Color [][] getBoard() {

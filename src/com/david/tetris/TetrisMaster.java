@@ -9,6 +9,8 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 public class TetrisMaster {
+
+    public static Piece heldPiece;
 	
 	public static void main(String ... args) throws AWTException, InterruptedException {
 		
@@ -40,7 +42,8 @@ public class TetrisMaster {
 				r.mouseMove(p.x, p.y);
 				r.mousePress(InputEvent.BUTTON1_MASK);
 				//r.mouseRelease(InputEvent.BUTTON1_MASK);
-			while (true) {
+			int count = 0;
+            while (true) {
 				//long start = -System.currentTimeMillis();
 				sensor = new TetrisSensor(p, points, width, height, r);
 				
@@ -52,10 +55,12 @@ public class TetrisMaster {
 				//System.out.println(keyPresses);
 				//start = -System.currentTimeMillis();
 				
-				
 				doMoves(r, keyPresses);
+
 				if (keyPresses != null) {
-					System.out.println(keyPresses);
+					if (keyPresses.contains(KeyEvent.VK_SPACE)) {
+                        System.out.println("Placed Piece " + (count++));
+                    }
 					//Thread.sleep(keyPresses.size()*40);
 				}
 				//System.out.println("Moved pieces in: " + ((start + System.currentTimeMillis()) + "ms"));
@@ -67,9 +72,6 @@ public class TetrisMaster {
 	
 	private static ArrayList<Integer> getKeyPresses(TetrisSensor sensor, Point p, Point [][] points) {
 		ArrayList<Integer> moveList = new ArrayList<Integer>();
-		                                             
-		long start = -System.currentTimeMillis();
-		
 		
 		Color [][] colors = sensor.getColorGrid(points);
 		/*System.out.println("Before placement:");
@@ -84,22 +86,31 @@ public class TetrisMaster {
 		Piece piece = pieceSensor.getCurrentPiece();
 		
 		double bestScore = Double.MAX_VALUE;
+        double bestHeldScore = Double.MAX_VALUE;
 		int bestRotation = -1;
 		int bestColumn = -1;
-		//Color [][] bestBoard = null;
+		//Color [][] boardToPass;
 		
 		if (piece != null) {
+
+            if (heldPiece == null) {
+                System.out.println("Hold first!");
+                heldPiece = piece;
+                moveList.add(KeyEvent.VK_SHIFT);
+                moveList.add(KeyEvent.VK_SHIFT);
+                return moveList;
+            }
 			//got the current piece. Now we need to move and try all its rotations to see where it should go
 			for (int c = 0; c < 10; c++) {
 				for (int rotation = 0; rotation < piece.getBlocks().length; rotation++) {
 					Piece newPiece = new Piece(new Point(0, c), piece, rotation);
-					BoardCalculator calculator = new BoardCalculator(copyGridFrom(colors));
+                    BoardCalculator calculator = new BoardCalculator(copyGridFrom(colors));
 					
 					calculator.cleanBoard();
 					if (calculator.addPiece(newPiece)) {
 						double score = calculator.scoreBoard();
-						//high value scores are bad 
-						if (score < bestScore) {
+						//high value scores are bad
+                        if (score < bestScore) {
 							bestScore = score;
 							bestRotation = rotation;
 							bestColumn = c;
@@ -108,6 +119,32 @@ public class TetrisMaster {
 					}
 				}
 			}
+
+            for (int c = 0; c < 10; c++) {
+                for (int rotation = 0; rotation < heldPiece.getBlocks().length; rotation++) {
+                    Piece newPiece = new Piece(new Point(0, c), heldPiece, rotation);
+                    BoardCalculator calculator = new BoardCalculator(copyGridFrom(colors));
+
+                    calculator.cleanBoard();
+                    if (calculator.addPiece(newPiece)) {
+                        double score = calculator.scoreBoard();
+                        //high value scores are bad
+                        if (score < bestHeldScore) {
+                            bestHeldScore = score;
+                        }
+                    }
+                }
+            }
+
+            if (bestHeldScore < bestScore) {
+                //swap held piece!
+                System.out.println("Swap!");
+                heldPiece = piece;
+                moveList.add(KeyEvent.VK_SHIFT);
+                moveList.add(KeyEvent.VK_SHIFT);
+                return moveList;
+            }
+
 			/*System.out.println("new best placement:");
 			for (int r = 0; r < 20; r++) {
 			for (int col = 0; col < 10; col++) {
@@ -171,9 +208,9 @@ public class TetrisMaster {
 		}
 		for (int num = 0; num < moveList.size(); num += 1) {
 			robot.keyPress(moveList.get(num));
-			robot.delay(30);
+			robot.delay(20);
 			robot.keyRelease(moveList.get(num));
-			robot.delay(30);
+			robot.delay(20);
 		}
 	}
 	
