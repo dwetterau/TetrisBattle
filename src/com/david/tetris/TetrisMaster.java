@@ -45,14 +45,14 @@ public class TetrisMaster {
 			int count = 0;
             while (true) {
 				//long start = -System.currentTimeMillis();
-				sensor = new TetrisSensor(p, points, width, height, r);
-				
-				r.waitForIdle();
-				
+                r.waitForIdle();
+                sensor = new TetrisSensor(p, points, width, height, r);
+
 				//System.out.println("Made sensor in: " + ((start + System.currentTimeMillis()) + "ms"));
 				//Get piece and move instructions
 				ArrayList<Integer> keyPresses = getKeyPresses(sensor, p, points); 
-				//System.out.println(keyPresses);
+				if (keyPresses != null)
+                System.out.println(keyPresses);
 				//start = -System.currentTimeMillis();
 				
 				doMoves(r, keyPresses);
@@ -61,7 +61,6 @@ public class TetrisMaster {
 					if (keyPresses.contains(KeyEvent.VK_SPACE)) {
                         System.out.println("Placed Piece " + (count++));
                     }
-					//Thread.sleep(keyPresses.size()*40);
 				}
 				//System.out.println("Moved pieces in: " + ((start + System.currentTimeMillis()) + "ms"));
 			}
@@ -141,7 +140,6 @@ public class TetrisMaster {
                 System.out.println("Swap!");
                 heldPiece = piece;
                 moveList.add(KeyEvent.VK_SHIFT);
-                moveList.add(KeyEvent.VK_SHIFT);
                 return moveList;
             }
 
@@ -208,9 +206,13 @@ public class TetrisMaster {
 		}
 		for (int num = 0; num < moveList.size(); num += 1) {
 			robot.keyPress(moveList.get(num));
+            robot.waitForIdle();
 			robot.delay(20);
+            robot.waitForIdle();
 			robot.keyRelease(moveList.get(num));
-			robot.delay(20);
+            robot.waitForIdle();
+            robot.delay(35);
+            robot.waitForIdle();
 		}
 	}
 	

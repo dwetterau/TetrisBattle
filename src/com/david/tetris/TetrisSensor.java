@@ -1,14 +1,7 @@
 package com.david.tetris;
 
-import java.awt.AWTException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 
 
@@ -31,7 +24,8 @@ public class TetrisSensor {
 	}
 	
 	public TetrisSensor(Point root, Point [][] points, int width, int height, Robot r) throws AWTException {
-		screenImage = r.createScreenCapture(new Rectangle(root.x, root.y, width + 1, height + 1));
+        this.robot = r;
+        screenImage = robot.createScreenCapture(new Rectangle(root.x, root.y, width + 1, height + 1));
 		this.points = points;
 	}
 	
@@ -135,10 +129,10 @@ public class TetrisSensor {
 		boolean foundFirst = false, foundSecond = false;
 		int xFound = -1;
 		int yFound = -1;
-		
+
 		all:
-		for (int y = 0; y < screenImage.getHeight(); y++) {
-			for (int x = 0; x < screenImage.getWidth(); x++) {
+        for (int x = 0; x < screenImage.getWidth(); x++) {
+		    for (int y = 0; y < screenImage.getHeight(); y++) {
 				Color c = new Color(screenImage.getRGB(x, y));
 				if (foundFirst) {
 					if (foundSecond) {
