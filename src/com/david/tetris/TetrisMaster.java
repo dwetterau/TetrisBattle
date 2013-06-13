@@ -39,9 +39,11 @@ public class TetrisMaster {
 			
 				//make sure the game has focus. This should be moved
 				Robot r = sensor.getRobot();
-				r.mouseMove(p.x, p.y);
+				r.mouseMove(p.x + 50, p.y + 100);
+				r.waitForIdle();
 				r.mousePress(InputEvent.BUTTON1_MASK);
-				//r.mouseRelease(InputEvent.BUTTON1_MASK);
+				r.waitForIdle();
+                r.mouseRelease(InputEvent.BUTTON1_MASK);
 			int count = 0;
             while (true) {
 				//long start = -System.currentTimeMillis();
