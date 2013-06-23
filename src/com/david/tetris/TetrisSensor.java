@@ -23,9 +23,9 @@ public class TetrisSensor {
 		getNewImage();
 	}
 	
-	public TetrisSensor(Point root, Point [][] points, int width, int height, Robot r) throws AWTException {
+	public TetrisSensor(Point [][] points, Rectangle rectangle, Robot r) throws AWTException {
         this.robot = r;
-        screenImage = robot.createScreenCapture(new Rectangle(root.x, root.y, width + 1, height + 1));
+        screenImage = robot.createScreenCapture(rectangle);
 		this.points = points;
 	}
 	
@@ -36,95 +36,7 @@ public class TetrisSensor {
 	public void getNewImage() {
 		screenImage = robot.createScreenCapture(fullScreenRectangle);
 	}
-	
-	public Point getRootPositionStartScreen() {		
-		boolean foundFirst = false, foundSecond = false;
-		int xFound = -1;
-		int yFound = -1;
-		
-		all:
-		for (int y = 0; y < screenImage.getHeight(); y++) {
-			for (int x = 0; x < screenImage.getWidth(); x++) {
-				Color c = new Color(screenImage.getRGB(x, y));
-				if (foundFirst) {
-					if (foundSecond) {
-						if (checkAll(c, 47)) {
-							xFound = x;
-							yFound = y;
-							break all;
-						} else if (checkAll (c, 34)) {
-							continue;
-						} else {
-							foundFirst = false;
-							foundSecond = false;
-						}
-					} else if (checkAll(c, 43)) {
-						continue;
-					} else if (checkAll(c, 34)) {
-						foundSecond = true;
-					} else {
-						foundFirst = false;
-					}
-				}
-				if (checkAll(c, 43)) {
-					foundFirst = true;
-				}
-				
-			}
-		}
-		if (xFound >= 0 && yFound >= 0) {
-			foundFirst = false;
-			for (int x = xFound; x >= 0; x--) {
-				Color c = new Color(screenImage.getRGB(x, yFound));
-				if (foundFirst) {
-					if (checkAll(c, 255)) {
-						System.out.println("Found the white background of the left edge.");
-						xFound = x + 1;
-						System.out.println(xFound+", "+yFound);
-						break;
-					} else if (!checkAll(c, 0)) {
-						foundFirst = false;
-					}
-				} else if (checkAll(c, 0)) {
-					System.out.println("Found black left edge");
-					foundFirst = true;
-				}
-				if (x == 0) {
-					xFound = -1;
-					yFound = -1;
-					System.out.println("Unable to find black side border.");
-				}
-			}
-			if (xFound >= 0) {
-				foundFirst = false;
-				//go up until you find the top edge too.
-				for (int y = yFound; y >= 0; y--) {
-					Color c = new Color(screenImage.getRGB(xFound, y));
-					if (foundFirst) {
-						if (checkAll(c, 255)) {
-							yFound = y + 1;
-							System.out.println("Successfully got root point.");
-							break;
-						}
-					} else if (checkAll(c, 0)) {
-						foundFirst = true;
-					} else {
-						System.out.println("Didn't find black left edge after supposedly finding it.");
-					}
-					if (y == 0) {
-						xFound = -1;
-						yFound = -1;
-						System.out.println("Unable to find top corner.");
-					}
-				}
-			}
-		}
-		if (xFound >=0 && yFound >=0) {
-			return new Point(xFound, yFound);
-		}
-		return null;
-	}
-	
+
 	public Point getBoardPosition() {		
 		boolean foundFirst = false, foundSecond = false;
 		int xFound = -1;
@@ -161,7 +73,6 @@ public class TetrisSensor {
 			}
 		}
 		if (xFound >= 0 && yFound >= 0) {
-			foundFirst = false;
 			for (int x = xFound; x >= 0; x--) {
 				Color c = new Color(screenImage.getRGB(x, yFound));
 				if (checkAll(c, 0)) {
@@ -190,6 +101,17 @@ public class TetrisSensor {
 		}
 		return null;
 	}
+
+    public Point [][] getAbsGridPointArray(Point rootPoint) {
+        Point [][] points  = getGridPointArray(rootPoint);
+        for (Point [] row : points) {
+            for (Point p : row) {
+                p.x += rootPoint.x;
+                p.y += rootPoint.y;
+            }
+        }
+        return points;
+    }
 	
 	public Point [][] getGridPointArray(Point rootPoint) {
 		Point [][] points = new Point [20][10];
@@ -232,7 +154,6 @@ public class TetrisSensor {
 				}
 			}
 		}
-		
 		return points;
 	}
 	
@@ -248,7 +169,7 @@ public class TetrisSensor {
 					return null;
 				}
 				colors[r][c] = new Color(screenImage.getRGB(points[r][c].x, points[r][c].y));
-			}
+            }
 		}
 		return colors;
 	}

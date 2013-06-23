@@ -1,9 +1,6 @@
 package com.david.tetris;
 
-import java.awt.AWTException;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -11,8 +8,14 @@ import java.util.ArrayList;
 public class TetrisMaster {
 
     public static Piece heldPiece;
-	
-	public static void main(String ... args) throws AWTException, InterruptedException {
+
+    public static int pieceNumber = 0;
+    public static int lastPieceMoved = -1;
+    public static ArrayList<Integer> lastMoves;
+    private static int interMoveDelay = 20;
+    private static int interMoveTypeDelay = 35;
+
+    public static void main(String ... args) throws AWTException, InterruptedException {
 		
 		TetrisSensor sensor = new TetrisSensor();
 		Point p = sensor.getBoardPosition();
@@ -37,18 +40,19 @@ public class TetrisMaster {
 		
 		if (p != null) {
 			
-				//make sure the game has focus. This should be moved
-				Robot r = sensor.getRobot();
-				r.mouseMove(p.x + 50, p.y + 100);
-				r.waitForIdle();
-				r.mousePress(InputEvent.BUTTON1_MASK);
-				r.waitForIdle();
-                r.mouseRelease(InputEvent.BUTTON1_MASK);
-			int count = 0;
+            //make sure the game has focus. This should be moved
+            Robot r = sensor.getRobot();
+            r.mouseMove(p.x + 50, p.y + 100);
+            r.waitForIdle();
+            r.mousePress(InputEvent.BUTTON1_MASK);
+            r.waitForIdle();
+            r.mouseRelease(InputEvent.BUTTON1_MASK);
+            Rectangle rectangle = new Rectangle(p.x, p.y, width + 1, height + 1);
+
             while (true) {
 				//long start = -System.currentTimeMillis();
                 r.waitForIdle();
-                sensor = new TetrisSensor(p, points, width, height, r);
+                sensor = new TetrisSensor(points, rectangle, r);
 
 				//System.out.println("Made sensor in: " + ((start + System.currentTimeMillis()) + "ms"));
 				//Get piece and move instructions
@@ -61,7 +65,7 @@ public class TetrisMaster {
 
 				if (keyPresses != null) {
 					if (keyPresses.contains(KeyEvent.VK_SPACE)) {
-                        System.out.println("Placed Piece " + (count++));
+                        pieceNumber++;
                     }
 				}
 				//System.out.println("Moved pieces in: " + ((start + System.currentTimeMillis()) + "ms"));
@@ -75,13 +79,6 @@ public class TetrisMaster {
 		ArrayList<Integer> moveList = new ArrayList<Integer>();
 		
 		Color [][] colors = sensor.getColorGrid(points);
-		/*System.out.println("Before placement:");
-		for (int r = 0; r < 20; r++) {
-		for (int c = 0; c < 10; c++) {
-			System.out.print(colors[r][c].getRed()+"-"+colors[r][c].getGreen()+ "-" + colors[r][c].getBlue() +"\t");
-		}
-		System.out.println();
-		}*/
 		
 		PieceSensor pieceSensor = new PieceSensor(colors);
 		Piece piece = pieceSensor.getCurrentPiece();
@@ -90,14 +87,12 @@ public class TetrisMaster {
         double bestHeldScore = Double.MAX_VALUE;
 		int bestRotation = -1;
 		int bestColumn = -1;
-		//Color [][] boardToPass;
-		
+
 		if (piece != null) {
 
             if (heldPiece == null) {
                 System.out.println("Hold first!");
                 heldPiece = piece;
-                moveList.add(KeyEvent.VK_SHIFT);
                 moveList.add(KeyEvent.VK_SHIFT);
                 return moveList;
             }
@@ -206,19 +201,55 @@ public class TetrisMaster {
 		if (moveList == null) {
 			return;
 		}
+
+        int tuningAmount = 0;
+
+        if (lastPieceMoved == pieceNumber && !moveList.contains(KeyEvent.VK_SPACE)) {
+            //This is the second time trying to move this piece, something is off...
+            if (lastMoves != null) {
+                tuningAmount = determineTuning(moveList, lastMoves);
+            }
+        }
+
+        interMoveDelay = Math.max(interMoveDelay + tuningAmount, 10);
+        interMoveTypeDelay = Math.max(interMoveDelay + tuningAmount, 10);
+
 		for (int num = 0; num < moveList.size(); num += 1) {
 			robot.keyPress(moveList.get(num));
             robot.waitForIdle();
-			robot.delay(20);
+			robot.delay(interMoveDelay);
             robot.waitForIdle();
 			robot.keyRelease(moveList.get(num));
             robot.waitForIdle();
-            robot.delay(35);
+            robot.delay(interMoveTypeDelay);
             robot.waitForIdle();
 		}
+
+        lastPieceMoved = pieceNumber;
+        lastMoves = moveList;
 	}
-	
-	public static Color[][] copyGridFrom(Color [][] grid) {
+
+    private static int determineTuning(ArrayList<Integer> moveList, ArrayList<Integer> lastMoves) {
+        if (lastPieceMoved == -1 || lastPieceMoved == 0) {
+            return 0;
+        }
+        boolean oldLeft = lastMoves.contains(KeyEvent.VK_LEFT);
+        boolean oldRight = lastMoves.contains(KeyEvent.VK_RIGHT);
+        boolean left = moveList.contains(KeyEvent.VK_LEFT);
+        boolean right = moveList.contains(KeyEvent.VK_RIGHT);
+
+        if ((oldLeft && left) || (oldRight && right)) {
+            System.out.println("TUNING: WAITING LONGER");
+            return 1;
+        } else if ((oldLeft && right) || (oldRight && left)) {
+            System.out.println("TUNING: GOING FASTER");
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    public static Color[][] copyGridFrom(Color [][] grid) {
 		Color [][] colors = new Color [grid.length][grid[0].length];
 		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[r].length; c++) {
