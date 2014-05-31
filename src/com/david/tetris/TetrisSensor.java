@@ -47,26 +47,26 @@ public class TetrisSensor {
 		    for (int y = 0; y < screenImage.getHeight(); y++) {
 				Color c = new Color(screenImage.getRGB(x, y));
 				if (foundFirst) {
-					if (foundSecond) {
-						if (checkAll(c, 47)) {
+                    if (foundSecond) {
+                        if (checkAll(c, 35)) {
 							xFound = x;
 							yFound = y;
 							break all;
-						} else if (checkAll (c, 34)) {
+						} else if (checkAll (c, 26)) {
 							continue;
 						} else {
 							foundFirst = false;
 							foundSecond = false;
 						}
-					} else if (checkAll(c, 43)) {
+					} else if (checkAll(c, 32)) {
 						continue;
-					} else if (checkAll(c, 34)) {
+					} else if (checkAll(c, 26)) {
 						foundSecond = true;
 					} else {
 						foundFirst = false;
 					}
 				}
-				if (checkAll(c, 43)) {
+				if (checkAll(c, 32)) {
 					foundFirst = true;
 				}
 				
@@ -99,6 +99,7 @@ public class TetrisSensor {
 		if (xFound >= 0 && yFound >= 0) {
 			return new Point(xFound, yFound);
 		}
+        System.out.println("Didn't find the board");
 		return null;
 	}
 
@@ -119,10 +120,10 @@ public class TetrisSensor {
 		if (rootPoint == null || rootPoint.x == -1 || rootPoint.y == -1) {
 			return null;
 		}
-		//34 is the grid color
-		int color = 34;
-		int notBorderColor1 = 47;
-		int notBorderColor2 = 43;
+		//26 is the grid color
+		int color = 26;
+		int notBorderColor1 = 35;
+		int notBorderColor2 = 32;
 		
 		int widthMax = Math.min(screenImage.getWidth()-1, rootPoint.x + 500);
 		int heightMax = Math.min(screenImage.getHeight()-1, rootPoint.y + 500);
@@ -137,7 +138,7 @@ public class TetrisSensor {
 					Color catty = new Color(screenImage.getRGB(x+1, y+1));
 					if (checkAll(right, color) && checkAll(catty, color) &&
 						(checkAll(down, notBorderColor1) || checkAll(down, notBorderColor2))) {
-						System.out.println("Found Top Point!" + x + "," + (y+1));
+						System.out.println("Found Top Point! " + x + "," + (y+1));
 						points[0][0] = new Point (x-1, y+2);
 						break all;
 					}
