@@ -37,6 +37,12 @@ public class TetrisSensor {
 		screenImage = robot.createScreenCapture(fullScreenRectangle);
 	}
 
+    // These colors are used to find the board. They are the top left square color
+    // the divider color, and the second to left top row square colors respectively.
+    public static final int GREY_COLOR_1 = 43;
+    public static final int GREY_COLOR_2 = 34;
+    public static final int GREY_COLOR_3 = 47;
+
 	public Point getBoardPosition() {		
 		boolean foundFirst = false, foundSecond = false;
 		int xFound = -1;
@@ -48,25 +54,25 @@ public class TetrisSensor {
 				Color c = new Color(screenImage.getRGB(x, y));
 				if (foundFirst) {
                     if (foundSecond) {
-                        if (checkAll(c, 35)) {
+                        if (checkAll(c, GREY_COLOR_3)) {
 							xFound = x;
 							yFound = y;
 							break all;
-						} else if (checkAll (c, 26)) {
+						} else if (checkAll (c, GREY_COLOR_2)) {
 							continue;
 						} else {
 							foundFirst = false;
 							foundSecond = false;
 						}
-					} else if (checkAll(c, 32)) {
+					} else if (checkAll(c, GREY_COLOR_1)) {
 						continue;
-					} else if (checkAll(c, 26)) {
+					} else if (checkAll(c, GREY_COLOR_2)) {
 						foundSecond = true;
 					} else {
 						foundFirst = false;
 					}
 				}
-				if (checkAll(c, 32)) {
+				if (checkAll(c, GREY_COLOR_1)) {
 					foundFirst = true;
 				}
 				
@@ -121,9 +127,9 @@ public class TetrisSensor {
 			return null;
 		}
 		//26 is the grid color
-		int color = 26;
-		int notBorderColor1 = 35;
-		int notBorderColor2 = 32;
+		int color = GREY_COLOR_2;
+		int notBorderColor1 = GREY_COLOR_3;
+		int notBorderColor2 = GREY_COLOR_1;
 		
 		int widthMax = Math.min(screenImage.getWidth()-1, rootPoint.x + 500);
 		int heightMax = Math.min(screenImage.getHeight()-1, rootPoint.y + 500);

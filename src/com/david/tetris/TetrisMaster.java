@@ -12,8 +12,8 @@ public class TetrisMaster {
     public static int pieceNumber = 0;
     public static int lastPieceMoved = -1;
     public static ArrayList<Integer> lastMoves;
-    private static int interMoveDelay = 20;
-    private static int interMoveTypeDelay = 35;
+    private static int interMoveDelay = 50                                                                                                                 ;
+    private static int interMoveTypeDelay = 10;
 
     public static void main(String ... args) throws AWTException, InterruptedException {
 
@@ -21,26 +21,27 @@ public class TetrisMaster {
         Point p = sensor.getBoardPosition();
         Point [][] points = sensor.getGridPointArray(p);
 
-        int width = 0;
-        int height = 0;
-
-        for (Point [] array : points ) {
-            for (Point point : array) {
-                point.x -= p.x;
-                point.y -= p.y;
-                if (point.x > width) {
-                    width = point.x;
-                }
-                if (point.y > height) {
-                    height = point.y;
-                }
-            }
-        }
-
 
         if (p != null) {
+            int width = 0;
+            int height = 0;
+
+            for (Point [] array : points ) {
+                for (Point point : array) {
+                    point.x -= p.x;
+                    point.y -= p.y;
+                    if (point.x > width) {
+                        width = point.x;
+                    }
+                    if (point.y > height) {
+                        height = point.y;
+                    }
+                }
+            }
+
             //make sure the game has focus. This should be moved
             Robot r = sensor.getRobot();
+            r.setAutoDelay(50);
             r.mouseMove(p.x + 50, p.y + 100);
             r.waitForIdle();
             r.mousePress(InputEvent.BUTTON1_MASK);
@@ -59,7 +60,6 @@ public class TetrisMaster {
                     System.out.println(keyPresses);
                 }
                 //start = -System.currentTimeMillis();
-
                 doMoves(r, keyPresses);
 
                 if (keyPresses != null) {
@@ -86,6 +86,7 @@ public class TetrisMaster {
         double bestHeldScore = Double.MAX_VALUE;
         int bestRotation = -1;
         int bestColumn = -1;
+        Color[][] bestBoard = new Color[0][0];
 
         if (piece != null) {
 
@@ -109,7 +110,7 @@ public class TetrisMaster {
                             bestScore = score;
                             bestRotation = rotation;
                             bestColumn = c;
-                            //bestBoard = calculator.getBoard();
+                            bestBoard = calculator.getBoard();
                         }
                     }
                 }
@@ -131,6 +132,8 @@ public class TetrisMaster {
                 }
             }
 
+            //printBoard(bestBoard);
+
             if (bestHeldScore < bestScore) {
                 //swap held piece!
                 System.out.println("Swap!");
@@ -138,18 +141,6 @@ public class TetrisMaster {
                 moveList.add(KeyEvent.VK_SHIFT);
                 return moveList;
             }
-
-            /*System.out.println("new best placement:");
-              for (int r = 0; r < 20; r++) {
-              for (int col = 0; col < 10; col++) {
-              System.out.print(bestBoard[r][col].getRed()+"-"+bestBoard[r][col].getGreen()+ "-" + bestBoard[r][col].getBlue() +"\t");
-              }
-              System.out.println();
-              }
-              System.out.println("@@@@@@@@@@@@@@@@@@@@@@"); */
-            //System.out.println("Best score: " + bestScore);
-            //System.out.println("Best rotation found: " + bestRotation);
-            //System.out.println("Best column found: " + bestColumn);
 
             //proper number of rotations
             int rotations = 0;
@@ -211,16 +202,16 @@ public class TetrisMaster {
         }
 
         interMoveDelay = Math.max(interMoveDelay + tuningAmount, 10);
-        interMoveTypeDelay = Math.max(interMoveDelay + tuningAmount, 10);
+        interMoveTypeDelay = Math.max(interMoveTypeDelay + tuningAmount, 10);
 
         for (int num = 0; num < moveList.size(); num += 1) {
             robot.keyPress(moveList.get(num));
             robot.waitForIdle();
-            robot.delay(interMoveDelay);
+            robot.delay(interMoveTypeDelay);
             robot.waitForIdle();
             robot.keyRelease(moveList.get(num));
             robot.waitForIdle();
-            robot.delay(interMoveTypeDelay);
+            robot.delay(interMoveDelay);
             robot.waitForIdle();
         }
 
@@ -237,6 +228,7 @@ public class TetrisMaster {
         boolean left = moveList.contains(KeyEvent.VK_LEFT);
         boolean right = moveList.contains(KeyEvent.VK_RIGHT);
 
+        /*
         if ((oldLeft && left) || (oldRight && right)) {
             System.out.println("TUNING: WAITING LONGER");
             return 1;
@@ -245,7 +237,8 @@ public class TetrisMaster {
             return -1;
         } else {
             return 0;
-        }
+        }*/
+        return 0;
     }
 
     public static Color[][] copyGridFrom(Color [][] grid) {

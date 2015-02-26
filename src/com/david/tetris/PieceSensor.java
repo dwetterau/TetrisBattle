@@ -8,25 +8,21 @@ public class PieceSensor {
 	
 	private Color [][] board;
 	
-	public static final Color DEST_COLOR = new Color(83, 83, 83);
+	public static final Color DEST_COLOR = new Color(102, 102, 102);
 	
-	public static final Color J_PIECE_COLOR = new Color(50, 92, 255);
+	public static final Color J_PIECE_COLOR = new Color(68, 124, 255);
 	
-	public static final Color L_PIECE_COLOR = new Color(255, 139, 0);
+	public static final Color L_PIECE_COLOR = new Color(255, 156, 35);
 	
-	public static final Color BLOCK_PIECE_COLOR = new Color(255, 213, 26);
+	public static final Color BLOCK_PIECE_COLOR = new Color(255, 217, 59);
 	
-	public static final Color LINE_PIECE_COLOR = new Color(31, 198, 255);
+	public static final Color LINE_PIECE_COLOR = new Color(44, 209, 255);
 	
-	public static final Color RIGHT_PIECE_COLOR = new Color(255, 37, 71);
+	public static final Color RIGHT_PIECE_COLOR = new Color(255, 67, 92);
 	
-	public static final Color LEFT_PIECE_COLOR = new Color(116, 238, 19);
+	public static final Color LEFT_PIECE_COLOR = new Color(134, 234, 51);
 	
-	public static final Color T_PIECE_COLOR = new Color(226, 34, 191);
-	
-	public static final Color ENEMY_LINE_COLOR = new Color(188, 188, 188);
-
-	public static final Color BOMB_COLOR = new Color(41, 41, 41);
+	public static final Color T_PIECE_COLOR = new Color(232, 76, 201);
 	
 	public static final Piece J_PIECE = new Piece(new Point(0,0), new Point[][] {
 		{ new Point(0,0), new Point(1,0), new Point(1,1), new Point(1,2) },
